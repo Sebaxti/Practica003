@@ -3,21 +3,28 @@ using UnityEngine.AI;
 
 public class SCR_Guardia : MonoBehaviour
 {
-
-    private NavMeshAgent agente;
-    private Animator animador;
-
-    public enum Estados { Patrol, Chase, Attack };
-    public Estados estadoActual;
-
-    public GameObject[] puntosDePatrulla;
-    private int puntoActual = 0;
-
-    public GameObject jugador;
-    public float distanciaParaAtacar = 3f;
-
     private bool estoyDisparando = false;
     private string animacionActual = "";
+    private Vector3 direccion;
+    private NavMeshAgent agente;
+    private Animator animador;
+    public enum Estados { Patrol, Chase, Attack };
+
+    [Header("ESTADOS")]
+    public Estados estadoActual;
+    public GameObject[] puntosDePatrulla;
+    private int puntoActual = 0;
+    public GameObject jugador, bala;
+
+    [Header("PATRULLAR")]
+    public float distanciaDejarDePerseguir;
+    public float velocidadPatrullar;
+    [Header("PERSEGUIR")]
+    public float velocidadPerseguir; 
+    [Header("ATACAR")]
+    public float distanciaParaAtacar;
+    public float disparoVelocidad;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -37,7 +44,7 @@ public class SCR_Guardia : MonoBehaviour
         Vector3 direccionAdelante = transform.TransformDirection(Vector3.forward) * 10;
         Debug.DrawRay(transform.position, direccionAdelante, Color.red);
 
-        // Ejecutamos el comportamiento según el estado
+        // Ejecutamos el comportamiento segï¿½n el estado
         switch (estadoActual)
         {
             case Estados.Patrol:
@@ -72,7 +79,7 @@ public class SCR_Guardia : MonoBehaviour
         {
             jugador = other.gameObject;
             estadoActual = Estados.Chase;
-            Debug.Log("¡Te veo! Te voy a perseguir");
+            Debug.Log("persiguiendo");
         }
     }
 
@@ -86,7 +93,7 @@ public class SCR_Guardia : MonoBehaviour
             estadoActual = Estados.Patrol;
             jugador = null;
             estoyDisparando = false;
-            Debug.Log("Te perdí de vista, vuelvo a patrullar");
+            Debug.Log("Te perdi de vista, vuelvo a patrullar");
         }
     }
 
@@ -119,7 +126,7 @@ public class SCR_Guardia : MonoBehaviour
             }
         }
 
-        agente.speed = 2f;
+        agente.speed = velocidadPatrullar;
     }
 
     void Perseguir()
@@ -129,21 +136,26 @@ public class SCR_Guardia : MonoBehaviour
         if (jugador != null)
         {
             agente.SetDestination(jugador.transform.position);
-            agente.speed = 4f;
+            agente.speed = velocidadPerseguir;
 
             // Si el jugador se aleja mucho, volvemos a patrullar
             float distancia = Vector3.Distance(transform.position, jugador.transform.position);
-            if (distancia > 15f)
+            if (distancia > distanciaDejarDePerseguir)
             {
                 estadoActual = Estados.Patrol;
                 jugador = null;
-                Debug.Log("Está muy lejos, vuelvo a patrullar");
+                Debug.Log("Estï¿½ muy lejos, vuelvo a patrullar");
             }
         }
     }
 
     void Atacar()
     {
+        if (jugador.gameObject == null)
+        {
+            estadoActual = Estados.Patrol;
+        }
+        
         // Detenemos el movimiento
         agente.SetDestination(transform.position);
         agente.speed = 0f;
@@ -179,15 +191,24 @@ public class SCR_Guardia : MonoBehaviour
         }
     }
 
+    private void FuncionDisparo()
+    {
+        direccion = (jugador.transform.position - transform.position).normalized;
+        GameObject proyectil = Instantiate(bala,transform.position,Quaternion.identity);
+
+        Rigidbody rb = proyectil.GetComponent<Rigidbody>();
+        if (rb != null) {
+            rb.linearVelocity = direccion * disparoVelocidad;
+        }
+        Destroy(proyectil,5f); 
+
+    }
+
     // Para visualizar los rangos en el editor
     void OnDrawGizmosSelected()
     {
         // Rango de ataque en rojo
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, distanciaParaAtacar);
-
-        // Rango máximo de persecución en amarillo
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, 15f);
     }
 }
