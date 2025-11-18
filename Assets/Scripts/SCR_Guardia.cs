@@ -3,102 +3,191 @@ using UnityEngine.AI;
 
 public class SCR_Guardia : MonoBehaviour
 {
-    NavMeshAgent Agente;
-    public enum Estados{Patrol,Chase,Attack};
-    public Estados myState;
-    public GameObject punto1,punto2,punto3,punto4,punto5;
-    public float mySpeed;
-    public int numeracion=0;
+
+    private NavMeshAgent agente;
     private Animator animador;
-    private bool shooting;
-    
+
+    public enum Estados { Patrol, Chase, Attack };
+    public Estados estadoActual;
+
+    public GameObject[] puntosDePatrulla;
+    private int puntoActual = 0;
+
+    public GameObject jugador;
+    public float distanciaParaAtacar = 3f;
+
+    private bool estoyDisparando = false;
+    private string animacionActual = "";
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         animador = GetComponent<Animator>();
-        Agente =  GetComponent<NavMeshAgent>();
-        myState=Estados.Patrol;
+        agente = GetComponent<NavMeshAgent>();
 
-        
+        estadoActual = Estados.Patrol;
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        Vector3 forward = transform.TransformDirection(Vector3.forward) * 10;
-        Debug.DrawRay(transform.position,forward,Color.red);
+        // Dibujamos el rayo para debug
+        Vector3 direccionAdelante = transform.TransformDirection(Vector3.forward) * 10;
+        Debug.DrawRay(transform.position, direccionAdelante, Color.red);
 
-        Debug.Log(numeracion);
-        switch (myState)
+        // Ejecutamos el comportamiento según el estado
+        switch (estadoActual)
         {
             case Estados.Patrol:
-                Patrulla();
+                Patrullar();
                 break;
-            
+
             case Estados.Chase:
-                Persigue();
+                Perseguir();
                 break;
-            
+
             case Estados.Attack:
-                //Ataca();
+                Atacar();
                 break;
-            default:
-                break;
-    }
-}
-
-void Patrulla()
-    { 
-        shooting=false;
-        animador.Play("Rifle Walk");
-        if(numeracion==0)
-        {
-            Agente.SetDestination(punto1.transform.position);
-            if(Vector3.Distance(transform.position,punto1.transform.position)<0.5f)
-            {
-                numeracion++;
-            }
         }
 
-        if(numeracion==1)
+        // Verificamos la distancia para atacar si estamos persiguiendo
+        if (estadoActual == Estados.Chase && jugador != null)
         {
-            Agente.SetDestination(punto2.transform.position);
-            if(Vector3.Distance(transform.position,punto2.transform.position)<0.5f)
+            float distancia = Vector3.Distance(transform.position, jugador.transform.position);
+            if (distancia <= distanciaParaAtacar)
             {
-                numeracion++;
-            }
-        }
-
-        if(numeracion==2)
-        {
-            Agente.SetDestination(punto3.transform.position);
-            if(Vector3.Distance(transform.position,punto3.transform.position)<0.5f)
-            {
-                numeracion++;
-            }
-        }
-
-        if(numeracion==3)
-        {
-            Agente.SetDestination(punto4.transform.position);
-            if(Vector3.Distance(transform.position,punto4.transform.position)<0.5f)
-            {
-                numeracion++;
-            }
-        }
-
-        if(numeracion==4)
-        {
-            Agente.SetDestination(punto5.transform.position);
-            if(Vector3.Distance(transform.position,punto5.transform.position)<0.5f)
-            {
-                numeracion=0;
+                estadoActual = Estados.Attack;
             }
         }
     }
 
-    void Persigue ()
+    // Cuando algo entra en el trigger
+    void OnTriggerEnter(Collider other)
     {
-        
+        // Si es el jugador y estamos patrullando
+        if (other.CompareTag("Player") && estadoActual == Estados.Patrol)
+        {
+            jugador = other.gameObject;
+            estadoActual = Estados.Chase;
+            Debug.Log("¡Te veo! Te voy a perseguir");
+        }
+    }
+
+    // Cuando algo sale del trigger
+    void OnTriggerExit(Collider other)
+    {
+        // Si el jugador sale del trigger
+        if (other.CompareTag("Player"))
+        {
+            // Volvemos a patrullar
+            estadoActual = Estados.Patrol;
+            jugador = null;
+            estoyDisparando = false;
+            Debug.Log("Te perdí de vista, vuelvo a patrullar");
+        }
+    }
+
+    void Patrullar()
+    {
+        CambiarAnimacion("Rifle Walk");
+
+        // Si no hay puntos de patrulla, solo idle
+        if (puntosDePatrulla == null || puntosDePatrulla.Length == 0)
+        {
+            CambiarAnimacion("Rifle Idle");
+            return;
+        }
+
+        // Vamos al punto actual
+        GameObject puntoDestino = puntosDePatrulla[puntoActual];
+        if (puntoDestino != null)
+        {
+            agente.SetDestination(puntoDestino.transform.position);
+
+            // Si llegamos al punto, vamos al siguiente
+            float distanciaAlPunto = Vector3.Distance(transform.position, puntoDestino.transform.position);
+            if (distanciaAlPunto < 1f)
+            {
+                puntoActual++;
+                if (puntoActual >= puntosDePatrulla.Length)
+                {
+                    puntoActual = 0;
+                }
+            }
+        }
+
+        agente.speed = 2f;
+    }
+
+    void Perseguir()
+    {
+        CambiarAnimacion("Rifle Run");
+
+        if (jugador != null)
+        {
+            agente.SetDestination(jugador.transform.position);
+            agente.speed = 4f;
+
+            // Si el jugador se aleja mucho, volvemos a patrullar
+            float distancia = Vector3.Distance(transform.position, jugador.transform.position);
+            if (distancia > 15f)
+            {
+                estadoActual = Estados.Patrol;
+                jugador = null;
+                Debug.Log("Está muy lejos, vuelvo a patrullar");
+            }
+        }
+    }
+
+    void Atacar()
+    {
+        // Detenemos el movimiento
+        agente.SetDestination(transform.position);
+        agente.speed = 0f;
+
+        // Miramos hacia el jugador
+        if (jugador != null)
+        {
+            Vector3 direccionAlJugador = jugador.transform.position - transform.position;
+            direccionAlJugador.y = 0;
+
+            Quaternion rotacionObjetivo = Quaternion.LookRotation(direccionAlJugador);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, Time.deltaTime * 5f);
+
+            // Si se aleja, volvemos a perseguir
+            float distancia = Vector3.Distance(transform.position, jugador.transform.position);
+            if (distancia > distanciaParaAtacar)
+            {
+                estadoActual = Estados.Chase;
+                estoyDisparando = false;
+            }
+        }
+
+        CambiarAnimacion("Firing Rifle");
+        estoyDisparando = true;
+    }
+
+    void CambiarAnimacion(string nuevaAnimacion)
+    {
+        if (animacionActual != nuevaAnimacion)
+        {
+            animador.Play(nuevaAnimacion);
+            animacionActual = nuevaAnimacion;
+        }
+    }
+
+    // Para visualizar los rangos en el editor
+    void OnDrawGizmosSelected()
+    {
+        // Rango de ataque en rojo
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, distanciaParaAtacar);
+
+        // Rango máximo de persecución en amarillo
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, 15f);
     }
 }
