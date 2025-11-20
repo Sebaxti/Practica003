@@ -8,6 +8,7 @@ public class SCR_Guardia : MonoBehaviour
     private Vector3 direccion;
     private NavMeshAgent agente;
     private Animator animador;
+    private float tiempoUltimoDisparo=0f;
     public enum Estados { Patrol, Chase, Attack };
 
     [Header("ESTADOS")]
@@ -20,10 +21,12 @@ public class SCR_Guardia : MonoBehaviour
     public float distanciaDejarDePerseguir;
     public float velocidadPatrullar;
     [Header("PERSEGUIR")]
-    public float velocidadPerseguir; 
+    public float velocidadPerseguir;
     [Header("ATACAR")]
+    public float velocidadRotacion;
     public float distanciaParaAtacar;
     public float disparoVelocidad;
+    public float tiempoEntreDisparos;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -151,9 +154,10 @@ public class SCR_Guardia : MonoBehaviour
 
     void Atacar()
     {
-        if (jugador.gameObject == null)
+        if (jugador == null)
         {
             estadoActual = Estados.Patrol;
+            return;
         }
         
         // Detenemos el movimiento
@@ -161,13 +165,12 @@ public class SCR_Guardia : MonoBehaviour
         agente.speed = 0f;
 
         // Miramos hacia el jugador
-        if (jugador != null)
-        {
+       
             Vector3 direccionAlJugador = jugador.transform.position - transform.position;
             direccionAlJugador.y = 0;
 
             Quaternion rotacionObjetivo = Quaternion.LookRotation(direccionAlJugador);
-            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, Time.deltaTime * 5f);
+            transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, Time.deltaTime * velocidadRotacion);
 
             // Si se aleja, volvemos a perseguir
             float distancia = Vector3.Distance(transform.position, jugador.transform.position);
@@ -176,11 +179,18 @@ public class SCR_Guardia : MonoBehaviour
                 estadoActual = Estados.Chase;
                 estoyDisparando = false;
             }
-        }
 
         CambiarAnimacion("Firing Rifle");
         estoyDisparando = true;
-    }
+
+        tiempoUltimoDisparo += Time.deltaTime;
+        if (tiempoUltimoDisparo >= tiempoEntreDisparos)
+        {
+            FuncionDisparo();
+            tiempoUltimoDisparo = 0f;
+        }
+
+        }
 
     void CambiarAnimacion(string nuevaAnimacion)
     {
@@ -193,14 +203,18 @@ public class SCR_Guardia : MonoBehaviour
 
     private void FuncionDisparo()
     {
+        if (jugador == null || bala == null) return; 
+
         direccion = (jugador.transform.position - transform.position).normalized;
-        GameObject proyectil = Instantiate(bala,transform.position,Quaternion.identity);
+        GameObject proyectil = Instantiate(bala, transform.position + Vector3.up * 1.7f + transform.forward * 1f, Quaternion.identity);
+                                                                  
 
         Rigidbody rb = proyectil.GetComponent<Rigidbody>();
-        if (rb != null) {
+        if (rb != null)
+        {
             rb.linearVelocity = direccion * disparoVelocidad;
         }
-        Destroy(proyectil,5f); 
+        Destroy(proyectil, 5f);
 
     }
 

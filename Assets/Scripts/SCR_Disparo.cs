@@ -20,11 +20,11 @@ public class SCR_Disparo : MonoBehaviour
         if(other.CompareTag("Player"))
         {
             Debug.Log("Ha golpeado");
-            var vidaPlayer=other.gameObject.GetComponent<SCR_Player>().vida-=danyo;
+            SCR_Player player = other.gameObject.GetComponent<SCR_Player>();
 
-            if (vidaPlayer < 0)
+            if (player != null) 
             {
-                Destroy(other.gameObject);
+                player.RecibirDanyo(danyo);
             }
 
             Destroy(gameObject);
