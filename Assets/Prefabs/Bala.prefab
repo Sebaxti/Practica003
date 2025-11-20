@@ -152,4 +152,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 21b05e20b78b8433b8a089a435d22ca7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SCR_Disparo
-  danyo: 10
+  danyo: 30
