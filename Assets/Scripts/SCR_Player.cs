@@ -7,17 +7,14 @@ public class SCR_Player : MonoBehaviour
     public float vidamaxima;
     public float vida;
 
-    public bool canvasOn;
-
     [Header("UI")]
     public Slider barraDeVida;
     public GameObject boton;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        canvasOn = false;
         vida = vidamaxima;
-        boton.SetActive(true);
+        boton.SetActive(false);
 
         
     }
@@ -26,8 +23,6 @@ public class SCR_Player : MonoBehaviour
     void Update()
     {
         ActualizarBarraDeVida();
-        
-        Debug.Log(canvasOn);
 
        
     }
@@ -49,20 +44,31 @@ public class SCR_Player : MonoBehaviour
         if (barraDeVida != null)
         {
             barraDeVida.value = vida / vidamaxima;
-        }
-
-        
+        } 
     }
 
     public void Morir()
     {
-        canvasOn=true;
-       gameObject.SetActive(false);   
+        gameObject.SetActive(false);
+        boton.SetActive(true);
+
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
     }
 
     public void Restart()
     {
+        vida = vidamaxima;
+
+        boton.SetActive(false);
+
         gameObject.SetActive(true);
-        
+
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
+        transform.position = new Vector3(-2,1, 12);
+
+
     }
 }

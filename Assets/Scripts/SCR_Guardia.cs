@@ -43,11 +43,11 @@ public class SCR_Guardia : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Dibujamos el rayo para debug
+        // Rayo para debug
         Vector3 direccionAdelante = transform.TransformDirection(Vector3.forward) * 10;
         Debug.DrawRay(transform.position, direccionAdelante, Color.red);
 
-        // Ejecutamos el comportamiento seg�n el estado
+        // Maquina de estados
         switch (estadoActual)
         {
             case Estados.Patrol:
@@ -63,7 +63,7 @@ public class SCR_Guardia : MonoBehaviour
                 break;
         }
 
-        // Verificamos la distancia para atacar si estamos persiguiendo
+        // Verificar la distancia para atacar
         if (estadoActual == Estados.Chase && jugador != null)
         {
             float distancia = Vector3.Distance(transform.position, jugador.transform.position);
@@ -74,29 +74,25 @@ public class SCR_Guardia : MonoBehaviour
         }
     }
 
-    // Cuando algo entra en el trigger
     void OnTriggerEnter(Collider other)
     {
-        // Si es el jugador y estamos patrullando
         if (other.CompareTag("Player") && estadoActual == Estados.Patrol)
         {
             jugador = other.gameObject;
             estadoActual = Estados.Chase;
-            Debug.Log("persiguiendo");
+            //Debug.Log("persiguiendo");
         }
     }
 
-    // Cuando algo sale del trigger
     void OnTriggerExit(Collider other)
     {
-        // Si el jugador sale del trigger
         if (other.CompareTag("Player"))
         {
-            // Volvemos a patrullar
+            //patrullar
             estadoActual = Estados.Patrol;
             jugador = null;
             estoyDisparando = false;
-            Debug.Log("Te perdi de vista, vuelvo a patrullar");
+            //Debug.Log("patrullar");
         }
     }
 
@@ -104,7 +100,7 @@ public class SCR_Guardia : MonoBehaviour
     {
         CambiarAnimacion("Rifle Walk");
 
-        // Si no hay puntos de patrulla, solo idle
+        // Si no hay puntos de patrulla
         if (puntosDePatrulla == null || puntosDePatrulla.Length == 0)
         {
             CambiarAnimacion("Rifle Idle");
@@ -117,7 +113,7 @@ public class SCR_Guardia : MonoBehaviour
         {
             agente.SetDestination(puntoDestino.transform.position);
 
-            // Si llegamos al punto, vamos al siguiente
+            // Siguiente punto
             float distanciaAlPunto = Vector3.Distance(transform.position, puntoDestino.transform.position);
             if (distanciaAlPunto < 1f)
             {
@@ -141,13 +137,13 @@ public class SCR_Guardia : MonoBehaviour
             agente.SetDestination(jugador.transform.position);
             agente.speed = velocidadPerseguir;
 
-            // Si el jugador se aleja mucho, volvemos a patrullar
+            // Volver a patrullar
             float distancia = Vector3.Distance(transform.position, jugador.transform.position);
             if (distancia > distanciaDejarDePerseguir)
             {
                 estadoActual = Estados.Patrol;
                 jugador = null;
-                Debug.Log("Est� muy lejos, vuelvo a patrullar");
+                //Debug.Log("patrullar");
             }
         }
     }
@@ -160,19 +156,19 @@ public class SCR_Guardia : MonoBehaviour
             return;
         }
         
-        // Detenemos el movimiento
+        // Detener el movimiento
         agente.SetDestination(transform.position);
         agente.speed = 0f;
 
+        
         // Miramos hacia el jugador
-       
             Vector3 direccionAlJugador = jugador.transform.position - transform.position;
             direccionAlJugador.y = 0;
 
             Quaternion rotacionObjetivo = Quaternion.LookRotation(direccionAlJugador);
             transform.rotation = Quaternion.Slerp(transform.rotation, rotacionObjetivo, Time.deltaTime * velocidadRotacion);
 
-            // Si se aleja, volvemos a perseguir
+            // Volver a perseguir
             float distancia = Vector3.Distance(transform.position, jugador.transform.position);
             if (distancia > distanciaParaAtacar)
             {
@@ -218,10 +214,9 @@ public class SCR_Guardia : MonoBehaviour
 
     }
 
-    // Para visualizar los rangos en el editor
     void OnDrawGizmosSelected()
     {
-        // Rango de ataque en rojo
+        // Rango de ataque
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, distanciaParaAtacar);
     }

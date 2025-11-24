@@ -831,7 +831,7 @@ GameObject:
   - component: {fileID: 245160161}
   - component: {fileID: 245160160}
   m_Layer: 5
-  m_Name: Button
+  m_Name: ButtonRestart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -900,7 +900,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 245160161}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1762282874}
+        m_TargetAssemblyTypeName: SCR_Player, Assembly-CSharp
+        m_MethodName: Restart
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &245160161
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2227,12 +2239,12 @@ MonoBehaviour:
   jugador: {fileID: 1061423121}
   bala: {fileID: 6020403454387034030, guid: 75aacf9b77bc941e08e81c54f8bfcbb0, type: 3}
   distanciaDejarDePerseguir: 15
-  velocidadPatrullar: 2
-  velocidadPerseguir: 4
-  velocidadRotacion: 2
+  velocidadPatrullar: 3
+  velocidadPerseguir: 5
+  velocidadRotacion: 3
   distanciaParaAtacar: 7
-  disparoVelocidad: 2
-  tiempoEntreDisparos: 1
+  disparoVelocidad: 10
+  tiempoEntreDisparos: 0.35
 --- !u!136 &786520898
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3320,15 +3332,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 572105835304292498, guid: 600be4a371d7c41a58b162eb0d4ffdb7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.9836137
+      value: -2
       objectReference: {fileID: 0}
     - target: {fileID: 572105835304292498, guid: 600be4a371d7c41a58b162eb0d4ffdb7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.15
+      value: -3
       objectReference: {fileID: 0}
     - target: {fileID: 572105835304292498, guid: 600be4a371d7c41a58b162eb0d4ffdb7, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 11.94
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 572105835304292498, guid: 600be4a371d7c41a58b162eb0d4ffdb7, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3865,7 +3877,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   vidamaxima: 100
   vida: 0
-  canvasOn: 0
   barraDeVida: {fileID: 795435791}
   boton: {fileID: 245160158}
 --- !u!1001 &1775349830
@@ -4879,6 +4890,30 @@ PrefabInstance:
     - target: {fileID: 4716040442460460287, guid: ff0eab1e445a04b1a8380ce87d0636c6, type: 3}
       propertyPath: m_Name
       value: CanvasSlider
+      objectReference: {fileID: 0}
+    - target: {fileID: 5143014538839640860, guid: ff0eab1e445a04b1a8380ce87d0636c6, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5143014538839640860, guid: ff0eab1e445a04b1a8380ce87d0636c6, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5143014538839640860, guid: ff0eab1e445a04b1a8380ce87d0636c6, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 261
+      objectReference: {fileID: 0}
+    - target: {fileID: 5143014538839640860, guid: ff0eab1e445a04b1a8380ce87d0636c6, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 13
+      objectReference: {fileID: 0}
+    - target: {fileID: 5143014538839640860, guid: ff0eab1e445a04b1a8380ce87d0636c6, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -172.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5143014538839640860, guid: ff0eab1e445a04b1a8380ce87d0636c6, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -36.5
       objectReference: {fileID: 0}
     - target: {fileID: 6275658975982040103, guid: ff0eab1e445a04b1a8380ce87d0636c6, type: 3}
       propertyPath: m_AdditionalShaderChannelsFlag
